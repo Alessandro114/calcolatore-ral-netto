@@ -1,10 +1,8 @@
 # Calcolatore RAL → Netto
 
-**Product Builder Task — Jet HR**
-
 Prototipo funzionante di un calcolatore che, data una Retribuzione Annua Lorda (RAL), restituisce il netto annuale e mensile percepito dal dipendente, con il dettaglio di tutte le voci trattenute.
 
-**[→ Demo live su GitHub Pages](https://alessandro114.github.io/jet-hr-ral-calculator/)**
+**[→ Demo live su GitHub Pages](https://alessandro114.github.io/calcolatore-ral-netto/)**
 
 ---
 
@@ -378,7 +376,7 @@ Questo è un **prototipo** che copre i casi più comuni. Ecco cosa è stato semp
 ## Struttura del progetto
 
 ```
-jet-hr-ral-calculator/
+calcolatore-ral-netto/
 ├── index.html    # Tutto il calcolatore (HTML + CSS + JS)
 └── README.md     # Questo file
 ```
@@ -398,7 +396,7 @@ python3 -m http.server 8080  # e visitare http://localhost:8080
 ```
 
 ### Online
-Il progetto è hostato su GitHub Pages: **[→ Demo live](https://alessandro114.github.io/jet-hr-ral-calculator/)**
+Il progetto è hostato su GitHub Pages: **[→ Demo live](https://alessandro114.github.io/calcolatore-ral-netto/)**
 
 ---
 
