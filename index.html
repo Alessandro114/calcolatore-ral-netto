@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calcolatore RAL → Netto | Jet HR</title>
+  <style>
+    :root {
+      --primary: #1a1a2e;
+      --accent: #4361ee;
+      --accent-hover: #3651d4;
+      --accent-light: #e8ecff;
+      --success: #06d6a0;
+      --danger: #ef476f;
+      --warning: #ffd166;
+      --info: #118ab2;
+      --gray-50: #f8f9fa;
+      --gray-100: #e9ecef;
+      --gray-200: #dee2e6;
+      --gray-300: #ced4da;
+      --gray-500: #adb5bd;
+      --gray-600: #6c757d;
+      --gray-700: #495057;
+      --gray-900: #212529;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header { text-align: center; margin-bottom: 40px; }
+    header h1 { font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    header p { font-size: 15px; color: var(--gray-700); max-width: 600px; margin: 0 auto; }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--gray-100);
+    }
+
+    /* Form elements */
+    .input-group { margin-bottom: 16px; }
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    .input-group .hint {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .input-row .input-group { margin-bottom: 0; }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      transition: border-color 0.2s;
+      outline: none;
+      background: white;
+      color: var(--gray-900);
+    }
+
+    input[type="number"]:focus, select:focus { border-color: var(--accent); }
+    input[type="number"]::placeholder { color: var(--gray-300); }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .checkbox-row label {
+      font-size: 14px;
+      color: var(--gray-700);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    /* Toggle (Privato/Pubblico) */
+    .toggle-group {
+      display: flex;
+      gap: 0;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .toggle-group button {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: white;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-group button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .toggle-group button:not(.active):hover {
+      background: var(--gray-50);
+    }
+
+    /* CTA Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      width: 100%;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.98); }
+
+    /* Collapsible sections */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .collapsible-header .toggle-icon {
+      font-size: 12px;
+      color: var(--gray-500);
+      transition: transform 0.2s;
+    }
+
+    .collapsible-body { overflow: hidden; transition: max-height 0.3s ease; }
+    .collapsible-body.collapsed { max-height: 0 !important; }
+
+    /* Results */
+    #results { display: none; }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .summary-card.highlight { background: var(--accent); color: white; }
+    .summary-card.highlight-green { background: var(--success); color: white; }
+
+    .summary-card .label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+      margin-bottom: 6px;
+    }
+
+    .summary-card .value { font-size: 24px; font-weight: 700; }
+    .summary-card .sub { font-size: 12px; opacity: 0.6; margin-top: 4px; }
+
+    /* Breakdown Table */
+    .breakdown-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .breakdown-card h2 {
+      padding: 18px 24px;
+      font-size: 17px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--gray-100);
+      margin: 0;
+    }
+
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .breakdown-table tr { border-bottom: 1px solid var(--gray-100); }
+    .breakdown-table tr:last-child { border-bottom: none; }
+
+    .breakdown-table td {
+      padding: 12px 24px;
+      font-size: 14px;
+    }
+
+    .breakdown-table td:first-child { color: var(--gray-700); }
+
+    .breakdown-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .breakdown-table tr.section-header td {
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--gray-50);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 24px;
+    }
+
+    .breakdown-table tr.total td {
+      font-weight: 700;
+      font-size: 15px;
+      background: var(--accent-light);
+      color: var(--primary);
+    }
+
+    .breakdown-table tr.subtotal td {
+      font-weight: 600;
+      background: var(--gray-50);
+    }
+
+    .negative { color: var(--danger) !important; }
+    .positive { color: var(--success) !important; }
+
+    /* IRPEF detail */
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .detail-table th, .detail-table td {
+      padding: 10px 24px;
+      font-size: 13px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .detail-table th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--gray-600);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-table td:nth-child(n+2) {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .detail-table tr.total-row { font-weight: 700; background: var(--gray-50); }
+
+    /* Bar chart */
+    .stacked-bar {
+      display: flex;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .stacked-bar .segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      transition: flex 0.5s ease;
+      min-width: 0;
+    }
+
+    .stacked-bar .segment span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0 3px;
+    }
+
+    .bar-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .bar-legend .item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--gray-700);
+    }
+
+    .bar-legend .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Assumptions */
+    .assumptions ul { list-style: none; padding: 0; }
+
+    .assumptions li {
+      position: relative;
+      padding: 5px 0 5px 20px;
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+
+    .assumptions li::before {
+      content: "•";
+      position: absolute;
+      left: 6px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 20px 16px; }
+      .card { padding: 20px; }
+      .summary-card .value { font-size: 20px; }
+      .input-row { grid-template-columns: 1fr; }
+      .breakdown-table td { padding: 10px 16px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Calcolatore RAL &rarr; Netto</h1>
+      <p>Simulazione completa della retribuzione netta: IRPEF, contributi, detrazioni, bonus, TFR, fondi pensione e fringe benefit</p>
+    </header>
+
+    <!-- ═══════════ INPUT SECTION ═══════════ -->
+
+    <!-- Base -->
+    <div class="card">
+      <h2>Dati retributivi</h2>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="ral">RAL &mdash; Retribuzione Annua Lorda (&euro;)</label>
+          <input type="number" id="ral" placeholder="es. 30000" min="0" step="100" value="30000">
+        </div>
+        <div class="input-group">
+          <label for="mensilita">Mensilit&agrave;</label>
+          <select id="mensilita">
+            <option value="13" selected>13 (tredicesima)</option>
+            <option value="14">14 (tredicesima + quattordicesima)</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-row" style="margin-top:16px">
+        <div class="input-group">
+          <label>Settore</label>
+          <div class="toggle-group" id="settoreToggle">
+            <button class="active" data-value="privato" onclick="setSettore('privato')">Privato</button>
+            <button data-value="pubblico" onclick="setSettore('pubblico')">Pubblico</button>
+          </div>
+          <div class="hint" id="settoreHint">INPS dipendente: 9,19% (fino a &euro;55.448), 10,19% oltre</div>
+        </div>
+        <div class="input-group">
+          <label for="regione">Regione di residenza</label>
+          <select id="regione" onchange="onRegioneChange()"></select>
+        </div>
+      </div>
+      <div class="input-row" style="margin-top:16px">
+        <div class="input-group">
+          <label for="comune">Comune</label>
+          <select id="comune" onchange="onComuneChange()"></select>
+        </div>
+        <div class="input-group" id="customComuneGroup" style="display:none">
+          <label for="customComuneRate">Aliquota comunale personalizzata (%)</label>
+          <input type="number" id="customComuneRate" value="0.8" min="0" max="1" step="0.01">
+        </div>
+      </div>
+    </div>
+
+    <!-- Familiari a carico -->
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleSection('familiariBody', this)">
+        <h2 style="border:none;padding-bottom:0;margin-bottom:0">Familiari a carico</h2>
+        <span class="toggle-icon">&#9660;</span>
+      </div>
+      <div class="collapsible-body collapsed" id="familiariBody">
+        <div style="padding-top:16px">
+          <div class="checkbox-row">
+            <input type="checkbox" id="coniuge">
+            <label for="coniuge">Coniuge a carico (reddito &le; &euro;2.840,51)</label>
+          </div>
+          <div class="input-row" style="margin-top:12px">
+            <div class="input-group">
+              <label for="figliMaggiori">Figli a carico &ge; 21 anni</label>
+              <input type="number" id="figliMaggiori" value="0" min="0" max="20">
+              <div class="hint">Per figli &lt; 21 si percepisce l'Assegno Unico (non in busta paga)</div>
+            </div>
+            <div class="input-group">
+              <label for="altriFamiliari">Altri familiari a carico</label>
+              <input type="number" id="altriFamiliari" value="0" min="0" max="20">
+              <div class="hint">Genitori, fratelli, ecc. (reddito &le; &euro;2.840,51)</div>
+            </div>
+          </div>
+          <div class="checkbox-row" style="margin-top:8px">
+            <input type="checkbox" id="haFigliMinori">
+            <label for="haFigliMinori">Ho figli a carico &lt; 21 anni (innalza la soglia fringe benefit a &euro;2.000)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fringe benefit, Fondo pensione -->
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleSection('extraBody', this)">
+        <h2 style="border:none;padding-bottom:0;margin-bottom:0">Fringe benefit e fondo pensione</h2>
+        <span class="toggle-icon">&#9660;</span>
+      </div>
+      <div class="collapsible-body collapsed" id="extraBody">
+        <div style="padding-top:16px">
+          <div class="input-row">
+            <div class="input-group">
+              <label for="fringeBenefit">Fringe benefit annuali (&euro;)</label>
+              <input type="number" id="fringeBenefit" value="0" min="0" step="50">
+              <div class="hint">Auto aziendale, buoni pasto, telefono, ecc. Esenti fino a &euro;1.000 (&euro;2.000 con figli a carico)</div>
+            </div>
+            <div class="input-group">
+              <label for="fondoPensione">Contributo annuo a fondo pensione (&euro;)</label>
+              <input type="number" id="fondoPensione" value="0" min="0" step="50">
+              <div class="hint">Deducibile fino a &euro;5.164,57/anno (riduce l'imponibile IRPEF)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALCOLA -->
+    <div style="margin-bottom:32px">
+      <button class="btn" onclick="calcola()">Calcola</button>
+    </div>
+
+    <!-- ═══════════ RESULTS SECTION ═══════════ -->
+    <div id="results">
+
+      <!-- Summary -->
+      <div class="summary-cards" id="summaryCards"></div>
+
+      <!-- Visual Bar -->
+      <div class="card">
+        <h2 style="border:none;padding-bottom:0;margin-bottom:16px">Composizione della RAL</h2>
+        <div class="stacked-bar" id="stackedBar"></div>
+        <div class="bar-legend" id="barLegend"></div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="breakdown-card">
+        <h2>Dettaglio calcolo</h2>
+        <table class="breakdown-table"><tbody id="breakdownBody"></tbody></table>
+      </div>
+
+      <!-- IRPEF Detail -->
+      <div class="breakdown-card">
+        <h2>Dettaglio IRPEF per scaglione</h2>
+        <table class="detail-table">
+          <thead>
+            <tr><th>Scaglione</th><th>Imponibile</th><th>Aliquota</th><th>Imposta</th></tr>
+          </thead>
+          <tbody id="irpefBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Regional Tax Detail -->
+      <div class="breakdown-card">
+        <h2>Dettaglio addizionale regionale</h2>
+        <table class="detail-table">
+          <thead>
+            <tr><th>Scaglione</th><th>Imponibile</th><th>Aliquota</th><th>Imposta</th></tr>
+          </thead>
+          <tbody id="regionaleBody"></tbody>
+        </table>
+      </div>
+
+      <!-- TFR -->
+      <div class="breakdown-card">
+        <h2>TFR &mdash; Trattamento di Fine Rapporto</h2>
+        <table class="breakdown-table"><tbody id="tfrBody"></tbody></table>
+      </div>
+
+      <!-- Cuneo Fiscale detail -->
+      <div class="breakdown-card" id="cuneoCard" style="display:none">
+        <h2>Bonus Cuneo Fiscale 2025</h2>
+        <table class="breakdown-table"><tbody id="cuneoBody"></tbody></table>
+      </div>
+
+      <!-- Assumptions -->
+      <div class="card assumptions" id="assumptionsCard"></div>
+    </div>
+
+    <footer>
+      Prototipo a scopo dimostrativo &mdash; Product Builder Task &mdash; Jet HR<br>
+      <a href="https://github.com/Alessandro114/jet-hr-ral-calculator" target="_blank" style="color:var(--accent)">GitHub</a>
+    </footer>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════════
+    //  CALCOLATORE RAL → NETTO — Modello completo
+    // ═══════════════════════════════════════════════════════════════════════
+    //
+    //  Pipeline:
+    //    RAL
+    //    + Fringe benefit tassabili (se sopra soglia esenzione)
+    //    − Contributo fondo pensione (deducibile, max €5.164,57)
+    //    − Contributi INPS dipendente
+    //    = Reddito complessivo / Imponibile fiscale
+    //    − IRPEF lorda (3 scaglioni 2025)
+    //    + Detrazioni lavoro dipendente
+    //    + Detrazioni familiari a carico
+    //    + Bonus cuneo fiscale (indennità/detrazione)
+    //    + Trattamento integrativo
+    //    = IRPEF netta
+    //    − Addizionale regionale
+    //    − Addizionale comunale
+    //    = NETTO ANNUALE
+    //
+    //  Separatamente: accantonamento TFR (non transita in busta paga)
+    //
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ── State ────────────────────────────────────────────────────────────
+    let settore = "privato";
+
+    function setSettore(val) {
+      settore = val;
+      document.querySelectorAll("#settoreToggle button").forEach(b => {
+        b.classList.toggle("active", b.dataset.value === val);
+      });
+      const hint = document.getElementById("settoreHint");
+      if (val === "privato") {
+        hint.textContent = "INPS dipendente: 9,19% (fino a €55.448), 10,19% oltre";
+      } else {
+        hint.textContent = "INPS dipendente: 8,80% (gestione pubblica ex-INPDAP)";
+      }
+    }
+
+    function toggleSection(id, header) {
+      const body = document.getElementById(id);
+      body.classList.toggle("collapsed");
+      const icon = header.querySelector(".toggle-icon");
+      if (body.classList.contains("collapsed")) {
+        body.style.maxHeight = "0";
+        icon.style.transform = "rotate(0)";
+      } else {
+        body.style.maxHeight = body.scrollHeight + "px";
+        icon.style.transform = "rotate(180deg)";
+      }
+    }
+
+    // ── Dati regionali ──────────────────────────────────────────────────
+    // Addizionale regionale IRPEF 2025 — scaglioni progressivi per regione.
+    // Fonte: Delibere regionali, aggiornamento anno d'imposta 2024/2025.
+    // Ogni entry: array di { max, rate } dove max = limite superiore dello
+    // scaglione (Infinity per l'ultimo) e rate = aliquota marginale.
+    const REGIONI = {
+      "Abruzzo":               { brackets: [{max:28000,rate:0.0167},{max:50000,rate:0.0287},{max:Infinity,rate:0.0333}] },
+      "Basilicata":            { brackets: [{max:Infinity,rate:0.0123}] },
+      "Calabria":              { brackets: [{max:Infinity,rate:0.0173}] },
+      "Campania":              { brackets: [{max:15000,rate:0.0173},{max:28000,rate:0.0296},{max:50000,rate:0.0320},{max:Infinity,rate:0.0333}] },
+      "Emilia-Romagna":        { brackets: [{max:15000,rate:0.0133},{max:28000,rate:0.0193},{max:50000,rate:0.0293},{max:Infinity,rate:0.0333}] },
+      "Friuli Venezia Giulia": { brackets: [{max:15000,rate:0.0070},{max:Infinity,rate:0.0123}] },
+      "Lazio":                 { brackets: [{max:15000,rate:0.0173},{max:Infinity,rate:0.0333}] },
+      "Liguria":               { brackets: [{max:28000,rate:0.0123},{max:50000,rate:0.0318},{max:Infinity,rate:0.0323}] },
+      "Lombardia":             { brackets: [{max:15000,rate:0.0123},{max:28000,rate:0.0158},{max:50000,rate:0.0172},{max:Infinity,rate:0.0173}] },
+      "Marche":                { brackets: [{max:15000,rate:0.0123},{max:28000,rate:0.0153},{max:50000,rate:0.0170},{max:Infinity,rate:0.0173}] },
+      "Molise":                { brackets: [{max:15000,rate:0.0173},{max:28000,rate:0.0193},{max:Infinity,rate:0.0333}] },
+      "Piemonte":              { brackets: [{max:15000,rate:0.0162},{max:28000,rate:0.0213},{max:50000,rate:0.0275},{max:Infinity,rate:0.0333}] },
+      "Puglia":                { brackets: [{max:15000,rate:0.0133},{max:28000,rate:0.0144},{max:50000,rate:0.0163},{max:Infinity,rate:0.0185}] },
+      "Sardegna":              { brackets: [{max:Infinity,rate:0.0123}] },
+      "Sicilia":               { brackets: [{max:Infinity,rate:0.0123}] },
+      "Toscana":               { brackets: [{max:15000,rate:0.0142},{max:28000,rate:0.0143},{max:50000,rate:0.0332},{max:Infinity,rate:0.0333}] },
+      "Trentino-Alto Adige (Bolzano)": { brackets: [{max:50000,rate:0.0123},{max:Infinity,rate:0.0173}] },
+      "Trentino-Alto Adige (Trento)":  { brackets: [{max:27000,rate:0},{max:50000,rate:0.0123},{max:Infinity,rate:0.0173}] },
+      "Umbria":                { brackets: [{max:28000,rate:0.0123},{max:50000,rate:0.0312},{max:Infinity,rate:0.0333}] },
+      "Valle d'Aosta":         { brackets: [{max:Infinity,rate:0.0123}] },
+      "Veneto":                { brackets: [{max:Infinity,rate:0.0123}] },
+    };
+
+    // ── Comuni principali per regione ────────────────────────────────────
+    // Addizionale comunale: aliquota fissa (%) sulla base imponibile.
+    // Fonte: Delibere comunali anno d'imposta 2024/2025.
+    const COMUNI = {
+      "Abruzzo": [
+        {name:"L'Aquila",rate:0.008},{name:"Pescara",rate:0.008},{name:"Chieti",rate:0.008},{name:"Teramo",rate:0.006}
+      ],
+      "Basilicata": [
+        {name:"Potenza",rate:0.008},{name:"Matera",rate:0.008}
+      ],
+      "Calabria": [
+        {name:"Catanzaro",rate:0.008},{name:"Cosenza",rate:0.008},{name:"Reggio Calabria",rate:0.008},{name:"Crotone",rate:0.008}
+      ],
+      "Campania": [
+        {name:"Napoli",rate:0.009},{name:"Salerno",rate:0.008},{name:"Caserta",rate:0.008},{name:"Avellino",rate:0.008}
+      ],
+      "Emilia-Romagna": [
+        {name:"Bologna",rate:0.008},{name:"Modena",rate:0.007},{name:"Parma",rate:0.006},{name:"Reggio Emilia",rate:0.005},{name:"Rimini",rate:0.008}
+      ],
+      "Friuli Venezia Giulia": [
+        {name:"Trieste",rate:0.008},{name:"Udine",rate:0.005},{name:"Pordenone",rate:0.005}
+      ],
+      "Lazio": [
+        {name:"Roma",rate:0.009},{name:"Latina",rate:0.008},{name:"Frosinone",rate:0.008},{name:"Viterbo",rate:0.008}
+      ],
+      "Liguria": [
+        {name:"Genova",rate:0.008},{name:"La Spezia",rate:0.008},{name:"Savona",rate:0.007}
+      ],
+      "Lombardia": [
+        {name:"Milano",rate:0.008},{name:"Brescia",rate:0.008},{name:"Bergamo",rate:0.006},{name:"Monza",rate:0.008},{name:"Varese",rate:0.008},{name:"Como",rate:0.006}
+      ],
+      "Marche": [
+        {name:"Ancona",rate:0.008},{name:"Pesaro",rate:0.006},{name:"Fermo",rate:0.007}
+      ],
+      "Molise": [
+        {name:"Campobasso",rate:0.008},{name:"Isernia",rate:0.008}
+      ],
+      "Piemonte": [
+        {name:"Torino",rate:0.008},{name:"Novara",rate:0.008},{name:"Alessandria",rate:0.008},{name:"Asti",rate:0.008}
+      ],
+      "Puglia": [
+        {name:"Bari",rate:0.008},{name:"Lecce",rate:0.008},{name:"Taranto",rate:0.008},{name:"Foggia",rate:0.008},{name:"Brindisi",rate:0.006}
+      ],
+      "Sardegna": [
+        {name:"Cagliari",rate:0.005},{name:"Sassari",rate:0.004},{name:"Nuoro",rate:0.004},{name:"Olbia",rate:0.004}
+      ],
+      "Sicilia": [
+        {name:"Palermo",rate:0.008},{name:"Catania",rate:0.008},{name:"Messina",rate:0.008},{name:"Siracusa",rate:0.008}
+      ],
+      "Toscana": [
+        {name:"Firenze",rate:0.002},{name:"Prato",rate:0.003},{name:"Livorno",rate:0.008},{name:"Pisa",rate:0.005},{name:"Siena",rate:0.005}
+      ],
+      "Trentino-Alto Adige (Bolzano)": [
+        {name:"Bolzano",rate:0.001},{name:"Merano",rate:0.001}
+      ],
+      "Trentino-Alto Adige (Trento)": [
+        {name:"Trento",rate:0.005},{name:"Rovereto",rate:0.005}
+      ],
+      "Umbria": [
+        {name:"Perugia",rate:0.008},{name:"Terni",rate:0.008}
+      ],
+      "Valle d'Aosta": [
+        {name:"Aosta",rate:0.003}
+      ],
+      "Veneto": [
+        {name:"Venezia",rate:0.008},{name:"Verona",rate:0.008},{name:"Padova",rate:0.008},{name:"Vicenza",rate:0.006},{name:"Treviso",rate:0.004}
+      ],
+    };
+
+    // ── Populate dropdowns ──────────────────────────────────────────────
+    function populateRegioni() {
+      const sel = document.getElementById("regione");
+      Object.keys(REGIONI).sort().forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = r;
+        if (r === "Lombardia") opt.selected = true;
+        sel.appendChild(opt);
+      });
+      onRegioneChange();
+    }
+
+    function onRegioneChange() {
+      const regione = document.getElementById("regione").value;
+      const sel = document.getElementById("comune");
+      sel.innerHTML = "";
+      const comuni = COMUNI[regione] || [];
+      comuni.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.rate;
+        opt.textContent = c.name + " (" + (c.rate * 100).toFixed(1) + "%)";
+        sel.appendChild(opt);
+      });
+      // Add custom option
+      const optCustom = document.createElement("option");
+      optCustom.value = "custom";
+      optCustom.textContent = "Altro comune (inserisci aliquota)";
+      sel.appendChild(optCustom);
+      onComuneChange();
+    }
+
+    function onComuneChange() {
+      const val = document.getElementById("comune").value;
+      document.getElementById("customComuneGroup").style.display = val === "custom" ? "" : "none";
+    }
+
+    // ── INPS ────────────────────────────────────────────────────────────
+    // Privato: 9,19% fino a €55.448 (prima fascia pensionabile), 10,19%
+    // sulla quota eccedente (+1% aggiuntivo ex L.335/1995).
+    // Pubblico: 8,80% (aliquota CTPS/CPDEL unificata, senza tetto).
+    const INPS_PRIVATE_BASE = 0.0919;
+    const INPS_PRIVATE_EXTRA = 0.1019;
+    const INPS_PRIVATE_THRESHOLD = 55448;
+    const INPS_PUBLIC = 0.0880;
+
+    function calcolaINPS(ral) {
+      if (settore === "pubblico") {
+        return { total: ral * INPS_PUBLIC, label: "8,80%" };
+      }
+      if (ral <= INPS_PRIVATE_THRESHOLD) {
+        return { total: ral * INPS_PRIVATE_BASE, label: "9,19%" };
+      }
+      const base = INPS_PRIVATE_THRESHOLD * INPS_PRIVATE_BASE;
+      const extra = (ral - INPS_PRIVATE_THRESHOLD) * INPS_PRIVATE_EXTRA;
+      return { total: base + extra, label: "9,19% + 1% su eccedenza" };
+    }
+
+    // ── IRPEF 2025 ──────────────────────────────────────────────────────
+    // D.Lgs. 216/2023, reso strutturale dalla Legge di Bilancio 2025.
+    // 3 scaglioni: 23% | 35% | 43%.
+    const IRPEF_BRACKETS = [
+      { min: 0,     max: 28000,    rate: 0.23, label: "Fino a €28.000" },
+      { min: 28000, max: 50000,    rate: 0.35, label: "€28.001 – €50.000" },
+      { min: 50000, max: Infinity, rate: 0.43, label: "Oltre €50.000" },
+    ];
+
+    function calcolaIRPEF(imponibile) {
+      let imposta = 0;
+      const dettaglio = [];
+      for (const b of IRPEF_BRACKETS) {
+        if (imponibile <= b.min) {
+          dettaglio.push({ ...b, base: 0, tax: 0 });
+          continue;
+        }
+        const base = Math.min(imponibile, b.max) - b.min;
+        const tax = base * b.rate;
+        imposta += tax;
+        dettaglio.push({ ...b, base, tax });
+      }
+      return { imposta, dettaglio };
+    }
+
+    // ── Detrazioni lavoro dipendente ─────────────────────────────────────
+    // Art. 13 TUIR. 4 fasce di reddito + €65 aggiuntivi per redditi
+    // €25.001-€35.000 (D.Lgs. 216/2023).
+    function detrazioniLavoro(reddito, irpefLorda) {
+      let d = 0;
+      if (reddito <= 15000) {
+        d = 1955;
+      } else if (reddito <= 28000) {
+        d = 1910 + 1190 * (28000 - reddito) / 13000;
+      } else if (reddito <= 50000) {
+        d = 1910 * (50000 - reddito) / 22000;
+      }
+      if (reddito > 25000 && reddito <= 35000) d += 65;
+      return Math.min(d, irpefLorda);
+    }
+
+    // ── Detrazioni familiari a carico ────────────────────────────────────
+    // Post Assegno Unico (D.Lgs. 230/2021): detrazioni in busta paga
+    // solo per coniuge e figli ≥ 21 anni.
+    //
+    // Coniuge: art. 12 TUIR, formula a fasce progressive.
+    // Figli ≥ 21: €950/figlio con phase-out basato su reddito.
+    // Altri familiari: €750/persona con phase-out.
+    function detrazioniConiuge(reddito) {
+      if (reddito <= 15000) {
+        return Math.max(0, 800 - 110 * (reddito / 15000));
+      } else if (reddito <= 29000) {
+        return 690;
+      } else if (reddito <= 29200) {
+        return 700;
+      } else if (reddito <= 34700) {
+        return 710;
+      } else if (reddito <= 35000) {
+        return 720;
+      } else if (reddito <= 35100) {
+        return 710;
+      } else if (reddito <= 35200) {
+        return 700;
+      } else if (reddito <= 40000) {
+        return 690;
+      } else if (reddito <= 80000) {
+        return 690 * (80000 - reddito) / 40000;
+      }
+      return 0;
+    }
+
+    function detrazioniFigli21(reddito, nFigli) {
+      if (nFigli <= 0 || reddito >= 95000) return 0;
+      const basePerFiglio = 950;
+      const coeff = Math.max(0, (95000 - reddito) / 95000);
+      return basePerFiglio * nFigli * coeff;
+    }
+
+    function detrazioniAltriFamiliari(reddito, n) {
+      if (n <= 0 || reddito >= 80000) return 0;
+      const basePerFam = 750;
+      const coeff = Math.max(0, (80000 - reddito) / 80000);
+      return basePerFam * n * coeff;
+    }
+
+    function calcolaDetrazioniFamiliari(reddito, coniuge, figliMagg, altri) {
+      let tot = 0;
+      let dettaglio = [];
+      if (coniuge) {
+        const d = detrazioniConiuge(reddito);
+        tot += d;
+        dettaglio.push({ label: "Coniuge a carico", value: d });
+      }
+      if (figliMagg > 0) {
+        const d = detrazioniFigli21(reddito, figliMagg);
+        tot += d;
+        dettaglio.push({ label: "Figli ≥ 21 a carico (×" + figliMagg + ")", value: d });
+      }
+      if (altri > 0) {
+        const d = detrazioniAltriFamiliari(reddito, altri);
+        tot += d;
+        dettaglio.push({ label: "Altri familiari (×" + altri + ")", value: d });
+      }
+      return { total: tot, dettaglio };
+    }
+
+    // ── Bonus cuneo fiscale 2025 ────────────────────────────────────────
+    // Legge di Bilancio 2025 (L. 207/2024) — misura strutturale.
+    // Due componenti distinte:
+    //
+    // A) INDENNITÀ (redditi ≤ €20.000): importo NON tassabile calcolato
+    //    come percentuale del reddito, per scaglioni.
+    //    - Fino a €8.500: 7,1%
+    //    - €8.501 – €15.000: 5,3%
+    //    - €15.001 – €20.000: 4,8%
+    //
+    // B) ULTERIORE DETRAZIONE (redditi €20.001 – €40.000):
+    //    - €20.001 – €32.000: €1.000 fissi
+    //    - €32.001 – €40.000: €1.000 × (40.000 − reddito) / 8.000
+    function calcolaCuneoFiscale(reddito) {
+      let indennita = 0; // non tassabile (va aggiunta al netto)
+      let detrazione = 0; // riduce IRPEF
+
+      if (reddito <= 8500) {
+        indennita = reddito * 0.071;
+      } else if (reddito <= 15000) {
+        indennita = reddito * 0.053;
+      } else if (reddito <= 20000) {
+        indennita = reddito * 0.048;
+      } else if (reddito <= 32000) {
+        detrazione = 1000;
+      } else if (reddito <= 40000) {
+        detrazione = 1000 * (40000 - reddito) / 8000;
+      }
+
+      return {
+        indennita: Math.round(indennita * 100) / 100,
+        detrazione: Math.round(detrazione * 100) / 100,
+        tipo: indennita > 0 ? "Indennità (non tassabile)" : (detrazione > 0 ? "Ulteriore detrazione IRPEF" : "Non spettante"),
+      };
+    }
+
+    // ── Trattamento integrativo ─────────────────────────────────────────
+    // €1.200/anno (€100/mese). Spetta se reddito ≤ €15.000 E l'IRPEF
+    // lorda è > detrazioni lavoro dipendente.
+    // NB: dal 2025 questo è parzialmente assorbito dal cuneo fiscale per
+    // i redditi ≤ €15.000 (l'indennità del cuneo sostituisce il
+    // trattamento). Lo mostro solo se il cuneo non copre già.
+    function calcolaTrattamentoIntegrativo(reddito, irpefLorda, detLavoro) {
+      // Per redditi ≤ 15.000 con cuneo fiscale attivo, il trattamento
+      // integrativo è di fatto assorbito dall'indennità cuneo.
+      // Per semplicità: riconosco il trattamento SOLO se non c'è cuneo.
+      // In un modello reale, il contribuente riceve il maggiore tra i due.
+      if (reddito <= 15000 && irpefLorda > detLavoro) {
+        return 1200;
+      }
+      return 0;
+    }
+
+    // ── Fringe benefit ──────────────────────────────────────────────────
+    // Soglia esenzione 2025-2027 (L. 207/2024):
+    //   - €1.000 per tutti i dipendenti
+    //   - €2.000 per dipendenti con figli a carico
+    // Se il valore complessivo SUPERA la soglia, l'INTERO importo diventa
+    // reddito imponibile (non solo l'eccedenza).
+    function calcolaFringeTassabile(fringeAnnuo, haFigliMinori) {
+      const soglia = haFigliMinori ? 2000 : 1000;
+      if (fringeAnnuo <= soglia) return { tassabile: 0, soglia, esente: true };
+      return { tassabile: fringeAnnuo, soglia, esente: false };
+    }
+
+    // ── Fondo pensione ──────────────────────────────────────────────────
+    // I contributi versati a forme pensionistiche complementari sono
+    // deducibili dal reddito complessivo fino a €5.164,57/anno
+    // (art. 8, c.4, D.Lgs. 252/2005).
+    const MAX_FONDO_PENSIONE = 5164.57;
+
+    function fondoPensioneDeducibile(contributo) {
+      return Math.min(contributo, MAX_FONDO_PENSIONE);
+    }
+
+    // ── Addizionale regionale ───────────────────────────────────────────
+    function calcolaAddRegionale(imponibile, regione) {
+      const data = REGIONI[regione];
+      if (!data) return { total: 0, dettaglio: [] };
+      let imposta = 0;
+      let prev = 0;
+      const dettaglio = [];
+      for (const b of data.brackets) {
+        if (imponibile <= prev) {
+          dettaglio.push({ min: prev, max: b.max, rate: b.rate, base: 0, tax: 0 });
+          prev = b.max;
+          continue;
+        }
+        const base = Math.min(imponibile, b.max) - prev;
+        const tax = base * b.rate;
+        imposta += tax;
+        dettaglio.push({ min: prev, max: b.max, rate: b.rate, base, tax });
+        prev = b.max;
+      }
+      return { total: imposta, dettaglio };
+    }
+
+    // ── Addizionale comunale ────────────────────────────────────────────
+    function getComuneRate() {
+      const val = document.getElementById("comune").value;
+      if (val === "custom") {
+        return parseFloat(document.getElementById("customComuneRate").value) / 100 || 0;
+      }
+      return parseFloat(val) || 0;
+    }
+
+    // ── TFR ─────────────────────────────────────────────────────────────
+    // Accantonamento annuo = RAL / 13,5 − contributo INPS (0,50%).
+    // Il TFR NON transita in busta paga: è accantonato (in azienda, al
+    // fondo INPS, o al fondo pensione complementare).
+    // Tassazione separata al momento dell'erogazione (aliquota media IRPEF
+    // degli ultimi 5 anni). Per il prototipo: stimo l'aliquota media.
+    function calcolaTFR(ral, aliquotaMediaIRPEF) {
+      const accLordo = ral / 13.5;
+      const contribINPS = ral * 0.005; // 0,50% al fondo garanzia
+      const accNetto = accLordo - contribINPS;
+      const impostaTFR = accNetto * aliquotaMediaIRPEF;
+      const tfrNetto = accNetto - impostaTFR;
+      return { lordo: accLordo, contribINPS, accantonamento: accNetto, aliquotaTFR: aliquotaMediaIRPEF, imposta: impostaTFR, netto: tfrNetto };
+    }
+
+    // ── Costo azienda ───────────────────────────────────────────────────
+    // Stima semplificata:
+    //   RAL + INPS datore (~31% privato, ~24,2% pubblico) + TFR lordo + INAIL (~0,4%)
+    function stimaCostoAzienda(ral, tfrLordo) {
+      const inpsDatoreRate = settore === "privato" ? 0.31 : 0.242;
+      const inailRate = settore === "privato" ? 0.004 : 0;
+      return ral + ral * inpsDatoreRate + tfrLordo + ral * inailRate;
+    }
+
+    // ── Formattazione ───────────────────────────────────────────────────
+    function fmt(n) {
+      return n.toLocaleString("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+    function fmtDec(n) {
+      return n.toLocaleString("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtPct(n) { return (n * 100).toFixed(1) + "%"; }
+    function fmtPctDec(n) { return (n * 100).toFixed(2) + "%"; }
+
+    // ── CALCOLO PRINCIPALE ──────────────────────────────────────────────
+    function calcola() {
+      const ral = parseFloat(document.getElementById("ral").value);
+      const mensilita = parseInt(document.getElementById("mensilita").value);
+      const regione = document.getElementById("regione").value;
+      const coniuge = document.getElementById("coniuge").checked;
+      const figliMagg = parseInt(document.getElementById("figliMaggiori").value) || 0;
+      const altriFam = parseInt(document.getElementById("altriFamiliari").value) || 0;
+      const haFigliMinori = document.getElementById("haFigliMinori").checked;
+      const fringeInput = parseFloat(document.getElementById("fringeBenefit").value) || 0;
+      const fondoPensInput = parseFloat(document.getElementById("fondoPensione").value) || 0;
+
+      if (!ral || ral <= 0) { alert("Inserisci una RAL valida."); return; }
+
+      // ── 1. Fringe benefit tassabile ──
+      const fringe = calcolaFringeTassabile(fringeInput, haFigliMinori);
+
+      // ── 2. Fondo pensione deducibile ──
+      const fondoPensDeducibile = fondoPensioneDeducibile(fondoPensInput);
+
+      // ── 3. INPS ──
+      const inps = calcolaINPS(ral);
+
+      // ── 4. Imponibile fiscale ──
+      // = RAL + fringe tassabile − INPS − fondo pensione deducibile
+      const imponibile = Math.max(0, ral + fringe.tassabile - inps.total - fondoPensDeducibile);
+
+      // ── 5. IRPEF ──
+      const { imposta: irpefLorda, dettaglio: irpefDett } = calcolaIRPEF(imponibile);
+
+      // ── 6. Detrazioni lavoro dipendente ──
+      const detLavoro = detrazioniLavoro(imponibile, irpefLorda);
+
+      // ── 7. Detrazioni familiari ──
+      const detFam = calcolaDetrazioniFamiliari(imponibile, coniuge, figliMagg, altriFam);
+
+      // ── 8. Cuneo fiscale 2025 ──
+      const cuneo = calcolaCuneoFiscale(imponibile);
+
+      // ── 9. Trattamento integrativo ──
+      // Il trattamento è assorbito dal cuneo per redditi ≤ €15K.
+      // Lo calcolo solo se il cuneo indennità è 0.
+      let tratIntegrativo = 0;
+      if (cuneo.indennita === 0) {
+        tratIntegrativo = calcolaTrattamentoIntegrativo(imponibile, irpefLorda, detLavoro);
+      }
+
+      // ── 10. IRPEF netta ──
+      const totDetrazioni = detLavoro + detFam.total + cuneo.detrazione;
+      const irpefNetta = Math.max(0, irpefLorda - totDetrazioni);
+
+      // ── 11. Addizionali ──
+      const addReg = calcolaAddRegionale(imponibile, regione);
+      const comuneRate = getComuneRate();
+      const addCom = imponibile * comuneRate;
+
+      // ── 12. Netto ──
+      const totaleTrattenute = inps.total + irpefNetta + addReg.total + addCom;
+      const bonusTotale = cuneo.indennita + tratIntegrativo;
+      const nettoAnnuale = ral - totaleTrattenute + bonusTotale;
+      const nettoMensile = nettoAnnuale / mensilita;
+
+      // ── 13. TFR ──
+      const aliquotaMedia = imponibile > 0 ? irpefLorda / imponibile : 0;
+      const tfr = calcolaTFR(ral, aliquotaMedia);
+
+      // ── 14. Costo azienda ──
+      const costoAzienda = stimaCostoAzienda(ral, tfr.lordo);
+
+      // ══════════════════════════════════════════════════════════════════
+      //  RENDER
+      // ══════════════════════════════════════════════════════════════════
+      document.getElementById("results").style.display = "block";
+
+      // Summary cards
+      const sc = document.getElementById("summaryCards");
+      sc.innerHTML = `
+        <div class="summary-card highlight">
+          <div class="label">Netto annuale</div>
+          <div class="value">${fmt(nettoAnnuale)}</div>
+          <div class="sub">${fmtDec(nettoMensile)} &times; ${mensilita} mesi</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Totale trattenute</div>
+          <div class="value">${fmt(totaleTrattenute)}</div>
+          <div class="sub">${fmtPct(totaleTrattenute / ral)} della RAL</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">TFR accantonato/anno</div>
+          <div class="value">${fmt(tfr.accantonamento)}</div>
+          <div class="sub">Netto stimato: ${fmt(tfr.netto)}</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Costo azienda</div>
+          <div class="value">${fmt(costoAzienda)}</div>
+          <div class="sub">RAL + contributi datore + TFR</div>
+        </div>
+      `;
+
+      // Stacked bar
+      const segments = [
+        { label: "Netto", value: nettoAnnuale, color: "#06d6a0" },
+        { label: "INPS", value: inps.total, color: "#ffd166" },
+        { label: "IRPEF", value: irpefNetta, color: "#ef476f" },
+        { label: "Add.Reg.", value: addReg.total, color: "#118ab2" },
+        { label: "Add.Com.", value: addCom, color: "#073b4c" },
+      ];
+      const barC = document.getElementById("stackedBar");
+      const legC = document.getElementById("barLegend");
+      barC.innerHTML = "";
+      legC.innerHTML = "";
+      const total = ral + fringe.tassabile;
+      segments.forEach(s => {
+        const pct = (s.value / total) * 100;
+        if (pct < 0.3) return;
+        barC.innerHTML += `<div class="segment" style="flex:${pct};background:${s.color}"><span>${pct > 7 ? s.label + " " + fmtPct(s.value / total) : ""}</span></div>`;
+        legC.innerHTML += `<div class="item"><span class="dot" style="background:${s.color}"></span>${s.label}: ${fmt(s.value)} (${fmtPct(s.value / total)})</div>`;
+      });
+
+      // Breakdown table
+      const bb = document.getElementById("breakdownBody");
+      const rows = [];
+
+      rows.push({ section: "Retribuzione" });
+      rows.push({ label: "RAL (Retribuzione Annua Lorda)", value: fmt(ral) });
+      if (fringe.tassabile > 0) {
+        rows.push({ label: `Fringe benefit tassabili (sopra soglia ${fmt(fringe.soglia)})`, value: "+ " + fmt(fringe.tassabile), cls: "negative" });
+      } else if (fringeInput > 0) {
+        rows.push({ label: `Fringe benefit (esenti, entro soglia ${fmt(fringe.soglia)})`, value: fmt(fringeInput) + " esenti" });
+      }
+      if (fondoPensDeducibile > 0) {
+        rows.push({ label: `Contributo fondo pensione (deducibile)`, value: "− " + fmt(fondoPensDeducibile), cls: "positive" });
+      }
+
+      rows.push({ section: "Contributi previdenziali" });
+      rows.push({ label: `INPS dipendente (${inps.label})`, value: "− " + fmt(inps.total), cls: "negative" });
+      rows.push({ label: "Imponibile fiscale", value: fmt(imponibile), subtotal: true });
+
+      rows.push({ section: "IRPEF" });
+      rows.push({ label: "IRPEF lorda (3 scaglioni)", value: "− " + fmt(irpefLorda), cls: "negative" });
+      rows.push({ label: "Detrazioni lavoro dipendente", value: "+ " + fmt(detLavoro), cls: "positive" });
+
+      if (detFam.total > 0) {
+        detFam.dettaglio.forEach(d => {
+          rows.push({ label: "Detrazione " + d.label, value: "+ " + fmt(d.value), cls: "positive" });
+        });
+      }
+
+      if (cuneo.detrazione > 0) {
+        rows.push({ label: "Ulteriore detrazione cuneo fiscale", value: "+ " + fmt(cuneo.detrazione), cls: "positive" });
+      }
+
+      rows.push({ label: "IRPEF netta", value: "− " + fmt(irpefNetta), cls: "negative", subtotal: true });
+
+      rows.push({ section: "Addizionali" });
+      rows.push({ label: `Addizionale regionale (${regione})`, value: "− " + fmt(addReg.total), cls: "negative" });
+      rows.push({ label: `Addizionale comunale (${fmtPctDec(comuneRate)})`, value: "− " + fmt(addCom), cls: "negative" });
+
+      if (bonusTotale > 0) {
+        rows.push({ section: "Bonus" });
+        if (cuneo.indennita > 0) {
+          rows.push({ label: "Indennità cuneo fiscale (non tassabile)", value: "+ " + fmt(cuneo.indennita), cls: "positive" });
+        }
+        if (tratIntegrativo > 0) {
+          rows.push({ label: "Trattamento integrativo (€100/mese)", value: "+ " + fmt(tratIntegrativo), cls: "positive" });
+        }
+      }
+
+      rows.push({ label: "NETTO ANNUALE", value: fmt(nettoAnnuale), total: true });
+      rows.push({ label: `Netto mensile (÷ ${mensilita})`, value: fmtDec(nettoMensile), total: true });
+
+      bb.innerHTML = rows.map(r => {
+        if (r.section) return `<tr class="section-header"><td colspan="2">${r.section}</td></tr>`;
+        const cls = r.total ? "total" : (r.subtotal ? "subtotal" : "");
+        return `<tr class="${cls}"><td>${r.label}</td><td class="${r.cls || ''}">${r.value}</td></tr>`;
+      }).join("");
+
+      // IRPEF detail
+      const ib = document.getElementById("irpefBody");
+      ib.innerHTML = irpefDett.map(d =>
+        `<tr><td>${d.label}</td><td>${fmt(d.base)}</td><td>${fmtPct(d.rate)}</td><td>${fmt(d.tax)}</td></tr>`
+      ).join("") + `<tr class="total-row"><td>Totale IRPEF lorda</td><td>${fmt(imponibile)}</td><td>${fmtPct(imponibile > 0 ? irpefLorda / imponibile : 0)}</td><td>${fmt(irpefLorda)}</td></tr>`;
+
+      // Regional detail
+      const rb = document.getElementById("regionaleBody");
+      rb.innerHTML = addReg.dettaglio.map(d => {
+        const label = d.max === Infinity ? `Oltre ${fmt(d.min)}` : `${fmt(d.min)} – ${fmt(d.max)}`;
+        return `<tr><td>${label}</td><td>${fmt(d.base)}</td><td>${fmtPctDec(d.rate)}</td><td>${fmt(d.tax)}</td></tr>`;
+      }).join("") + `<tr class="total-row"><td>Totale add. regionale</td><td>${fmt(imponibile)}</td><td>${fmtPctDec(imponibile > 0 ? addReg.total / imponibile : 0)}</td><td>${fmt(addReg.total)}</td></tr>`;
+
+      // TFR
+      const tb = document.getElementById("tfrBody");
+      tb.innerHTML = `
+        <tr class="section-header"><td colspan="2">Accantonamento annuale</td></tr>
+        <tr><td>Retribuzione annua / 13,5</td><td>${fmt(tfr.lordo)}</td></tr>
+        <tr><td>Contributo INPS fondo garanzia (0,50%)</td><td class="negative">− ${fmt(tfr.contribINPS)}</td></tr>
+        <tr class="subtotal"><td>TFR accantonato annuo</td><td>${fmt(tfr.accantonamento)}</td></tr>
+        <tr class="section-header"><td colspan="2">Tassazione separata (stima all'erogazione)</td></tr>
+        <tr><td>Aliquota media IRPEF stimata</td><td>${fmtPct(tfr.aliquotaTFR)}</td></tr>
+        <tr><td>Imposta TFR stimata</td><td class="negative">− ${fmt(tfr.imposta)}</td></tr>
+        <tr class="total"><td>TFR netto stimato (annuo)</td><td>${fmt(tfr.netto)}</td></tr>
+      `;
+
+      // Cuneo fiscale card
+      const cuneoCard = document.getElementById("cuneoCard");
+      const cb = document.getElementById("cuneoBody");
+      if (cuneo.indennita > 0 || cuneo.detrazione > 0) {
+        cuneoCard.style.display = "";
+        const cuneoRows = [];
+        cuneoRows.push(`<tr><td>Tipo di beneficio</td><td>${cuneo.tipo}</td></tr>`);
+        cuneoRows.push(`<tr><td>Reddito complessivo</td><td>${fmt(imponibile)}</td></tr>`);
+        if (cuneo.indennita > 0) {
+          const pct = imponibile <= 8500 ? "7,1%" : (imponibile <= 15000 ? "5,3%" : "4,8%");
+          cuneoRows.push(`<tr><td>Percentuale applicata</td><td>${pct}</td></tr>`);
+          cuneoRows.push(`<tr class="total"><td>Indennità annua (non tassabile)</td><td class="positive">${fmt(cuneo.indennita)}</td></tr>`);
+          cuneoRows.push(`<tr><td>Indennità mensile</td><td class="positive">${fmtDec(cuneo.indennita / 12)}</td></tr>`);
+        } else {
+          cuneoRows.push(`<tr class="total"><td>Detrazione IRPEF annua</td><td class="positive">${fmt(cuneo.detrazione)}</td></tr>`);
+          if (imponibile > 32000) {
+            cuneoRows.push(`<tr><td>Formula</td><td>€1.000 × (40.000 − reddito) / 8.000</td></tr>`);
+          }
+        }
+        cb.innerHTML = cuneoRows.join("");
+      } else {
+        cuneoCard.style.display = "none";
+      }
+
+      // Assumptions
+      const ac = document.getElementById("assumptionsCard");
+      const assumptionsList = [
+        `<strong>Profilo:</strong> ${settore === "privato" ? "Dipendente privato" : "Dipendente pubblico"} a tempo indeterminato, residente in ${regione}`,
+        `<strong>Anno fiscale:</strong> 2025 (IRPEF a 3 scaglioni: 23% / 35% / 43%)`,
+        `<strong>INPS dipendente:</strong> ${settore === "privato" ? "9,19% fino a €55.448, 10,19% oltre (settore privato)" : "8,80% aliquota unificata (gestione pubblica ex-INPDAP)"}`,
+        `<strong>Detrazioni lavoro:</strong> Art. 13 TUIR, 4 fasce + €65 aggiuntivi (redditi €25K-€35K)`,
+        `<strong>Cuneo fiscale 2025:</strong> Indennità per redditi ≤ €20K (7,1% / 5,3% / 4,8%) + ulteriore detrazione €1.000 per redditi €20K-€40K`,
+        `<strong>Trattamento integrativo:</strong> €1.200/anno per redditi ≤ €15.000 (se non già coperto dal cuneo)`,
+        `<strong>Familiari a carico:</strong> Detrazioni per coniuge (art. 12 TUIR) e figli ≥ 21 anni (€950/figlio, phase-out a €95K). Figli < 21: Assegno Unico separato`,
+        `<strong>Fringe benefit:</strong> Esenti fino a €1.000 (€2.000 con figli a carico). Oltre soglia: intero importo tassabile`,
+        `<strong>Fondo pensione:</strong> Deducibile fino a €5.164,57/anno dal reddito complessivo`,
+        `<strong>TFR:</strong> Accantonamento RAL/13,5 − 0,50% INPS. Tassazione separata stimata con aliquota media IRPEF`,
+        `<strong>Costo azienda:</strong> RAL + INPS datore (~${settore === "privato" ? "31%" : "24,2%"}) + TFR + ${settore === "privato" ? "INAIL (~0,4%)" : "—"}`,
+        `<strong>Non inclusi:</strong> Assegno Unico figli < 21, detrazioni per oneri (mutuo, spese mediche, ecc.), redditi aggiuntivi, conguaglio 730, cedolare secca, NASPI/CIG`,
+      ];
+      ac.innerHTML = `<h2>Ipotesi e semplificazioni</h2><ul>${assumptionsList.map(a => `<li>${a}</li>`).join("")}</ul>`;
+
+      // Scroll
+      document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // ── Init ────────────────────────────────────────────────────────────
+    populateRegioni();
+
+    // Calcola on Enter
+    document.getElementById("ral").addEventListener("keydown", e => {
+      if (e.key === "Enter") calcola();
+    });
+
+    // Auto-calculate
+    calcola();
+  </script>
+</body>
+</html>
