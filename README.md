@@ -1,413 +1,413 @@
-# Calcolatore RAL → Netto
+# RAL → Net Salary Calculator
 
-Prototipo funzionante di un calcolatore che, data una Retribuzione Annua Lorda (RAL), restituisce il netto annuale e mensile percepito dal dipendente, con il dettaglio di tutte le voci trattenute.
+A working prototype of a calculator that, given a gross annual salary (RAL — *Retribuzione Annua Lorda*), returns the employee's annual and monthly net pay, with a breakdown of every withholding.
 
-**[→ Demo live su GitHub Pages](https://alessandro114.github.io/calcolatore-ral-netto/)**
+**[→ Live demo on GitHub Pages](https://alessandro114.github.io/calcolatore-ral-netto/)**
 
 ---
 
-## Sommario
+## Contents
 
-- [Come funziona](#come-funziona)
-- [Pipeline di calcolo](#pipeline-di-calcolo)
-- [Dettaglio di ogni componente](#dettaglio-di-ogni-componente)
-  - [1. Contributi INPS dipendente](#1-contributi-inps-dipendente)
-  - [2. Fringe benefit](#2-fringe-benefit)
-  - [3. Fondo pensione complementare](#3-fondo-pensione-complementare)
+- [How it works](#how-it-works)
+- [Calculation pipeline](#calculation-pipeline)
+- [Breakdown of each component](#breakdown-of-each-component)
+  - [1. Employee INPS contributions](#1-employee-inps-contributions)
+  - [2. Fringe benefits](#2-fringe-benefits)
+  - [3. Supplementary pension fund](#3-supplementary-pension-fund)
   - [4. IRPEF 2025](#4-irpef-2025)
-  - [5. Detrazioni lavoro dipendente](#5-detrazioni-lavoro-dipendente)
-  - [6. Detrazioni familiari a carico](#6-detrazioni-familiari-a-carico)
-  - [7. Bonus cuneo fiscale 2025](#7-bonus-cuneo-fiscale-2025)
-  - [8. Trattamento integrativo](#8-trattamento-integrativo)
-  - [9. Addizionale regionale IRPEF](#9-addizionale-regionale-irpef)
-  - [10. Addizionale comunale IRPEF](#10-addizionale-comunale-irpef)
-  - [11. TFR — Trattamento di Fine Rapporto](#11-tfr--trattamento-di-fine-rapporto)
-  - [12. Costo azienda](#12-costo-azienda)
-- [Input disponibili](#input-disponibili)
-- [Output generati](#output-generati)
-- [Semplificazioni e limiti noti](#semplificazioni-e-limiti-noti)
-- [Struttura del progetto](#struttura-del-progetto)
-- [Come eseguire](#come-eseguire)
+  - [5. Employee tax deductions](#5-employee-tax-deductions)
+  - [6. Dependent family deductions](#6-dependent-family-deductions)
+  - [7. Tax wedge bonus 2025](#7-tax-wedge-bonus-2025)
+  - [8. Supplementary treatment](#8-supplementary-treatment)
+  - [9. Regional IRPEF surtax](#9-regional-irpef-surtax)
+  - [10. Municipal IRPEF surtax](#10-municipal-irpef-surtax)
+  - [11. TFR — Severance pay](#11-tfr--severance-pay)
+  - [12. Employer cost](#12-employer-cost)
+- [Available inputs](#available-inputs)
+- [Generated outputs](#generated-outputs)
+- [Simplifications and known limits](#simplifications-and-known-limits)
+- [Project structure](#project-structure)
+- [How to run](#how-to-run)
 
 ---
 
-## Come funziona
+## How it works
 
-Il calcolatore è una **singola pagina HTML** senza dipendenze esterne (zero framework, zero build step). Tutta la logica fiscale è implementata in JavaScript vanilla con funzioni isolate e documentate.
+The calculator is a **single HTML page** with no external dependencies (zero frameworks, zero build step). All the tax logic is implemented in vanilla JavaScript with isolated, documented functions.
 
-L'utente inserisce i parametri → clicca "Calcola" → ottiene:
-- **Card di sintesi** con netto annuale, mensile, trattenute e costo azienda
-- **Barra visuale** con la composizione della RAL (netto vs. imposte)
-- **Tabella breakdown** con ogni voce di calcolo
-- **Dettaglio IRPEF** per scaglione
-- **Dettaglio addizionale regionale** per scaglione
-- **Sezione TFR** con accantonamento e tassazione separata stimata
-- **Dettaglio cuneo fiscale** (quando applicabile)
-- **Lista delle ipotesi** adottate
+The user enters the parameters → clicks "Calculate" → gets:
+- **Summary cards** with annual net, monthly net, withholdings and employer cost
+- **Visual bar** showing the composition of the RAL (net vs. taxes)
+- **Breakdown table** with every line item of the calculation
+- **IRPEF detail** by bracket
+- **Regional surtax detail** by bracket
+- **TFR section** with accrual and estimated separate taxation
+- **Tax wedge detail** (when applicable)
+- **List of assumptions** applied
 
 ---
 
-## Pipeline di calcolo
+## Calculation pipeline
 
 ```
-RAL (Retribuzione Annua Lorda)
-  + Fringe benefit tassabili (se superano la soglia di esenzione)
-  − Contributo a fondo pensione (deducibile, max €5.164,57)
-  − Contributi INPS dipendente
+RAL (Gross Annual Salary)
+  + Taxable fringe benefits (if they exceed the exemption threshold)
+  − Pension fund contribution (deductible, max €5.164,57)
+  − Employee INPS contributions
   ─────────────────────────────────────────
-  = REDDITO COMPLESSIVO (imponibile fiscale)
+  = TOTAL INCOME (taxable base)
   ─────────────────────────────────────────
-  − IRPEF lorda (3 scaglioni progressivi)
-  + Detrazioni lavoro dipendente (art. 13 TUIR)
-  + Detrazioni familiari a carico (coniuge, figli ≥ 21, altri)
-  + Ulteriore detrazione cuneo fiscale (redditi €20K-€40K)
+  − Gross IRPEF (3 progressive brackets)
+  + Employee tax deductions (art. 13 TUIR)
+  + Dependent family deductions (spouse, children ≥ 21, others)
+  + Additional tax wedge deduction (income €20K-€40K)
   ─────────────────────────────────────────
-  = IRPEF NETTA
+  = NET IRPEF
   ─────────────────────────────────────────
-  − Addizionale regionale IRPEF
-  − Addizionale comunale IRPEF
-  + Indennità cuneo fiscale (redditi ≤ €20K, non tassabile)
-  + Trattamento integrativo (se spettante)
+  − Regional IRPEF surtax
+  − Municipal IRPEF surtax
+  + Tax wedge allowance (income ≤ €20K, non-taxable)
+  + Supplementary treatment (if applicable)
   ─────────────────────────────────────────
-  = NETTO ANNUALE
-  ÷ mensilità (13 o 14)
-  = NETTO MENSILE
+  = ANNUAL NET
+  ÷ number of paychecks (13 or 14)
+  = MONTHLY NET
 
-  Separatamente: TFR accantonato (non transita in busta paga)
+  Separately: accrued TFR (does not pass through the payslip)
 ```
 
 ---
 
-## Dettaglio di ogni componente
+## Breakdown of each component
 
-### 1. Contributi INPS dipendente
+### 1. Employee INPS contributions
 
-I contributi previdenziali a carico del lavoratore finanziano la pensione futura.
+Social-security contributions paid by the worker fund their future pension.
 
-| Settore | Aliquota | Note |
+| Sector | Rate | Notes |
 |---------|----------|------|
-| **Privato** | 9,19% fino a €55.448; 10,19% oltre | La soglia (prima fascia pensionabile) è aggiornata annualmente dall'INPS. L'1% aggiuntivo è previsto dall'art. 3-ter L. 438/1992 |
-| **Pubblico** | 8,80% flat | Aliquota unificata gestione ex-INPDAP (CTPS/CPDEL). Non prevede soglia |
+| **Private** | 9.19% up to €55.448; 10.19% above | The threshold (first pensionable band) is updated annually by INPS. The extra 1% is set by art. 3-ter of Law 438/1992 |
+| **Public** | 8.80% flat | Unified rate of the former INPDAP scheme (CTPS/CPDEL). No threshold |
 
-**Cosa non è incluso:** il contributo INPS a carico del datore (~24-32%) viene conteggiato solo nella stima del costo azienda.
+**What is not included:** the employer's INPS contribution (~24-32%) is counted only in the employer cost estimate.
 
-**Riferimenti normativi:** L. 335/1995 (riforma Dini), L. 438/1992 (contributo aggiuntivo 1%), Circ. INPS annuali.
+**Legal references:** Law 335/1995 (Dini reform), Law 438/1992 (additional 1% contribution), annual INPS circulars.
 
 ---
 
-### 2. Fringe benefit
+### 2. Fringe benefits
 
-I fringe benefit sono compensi in natura (auto aziendale, buoni pasto, telefono, alloggio) che il datore eroga al dipendente.
+Fringe benefits are in-kind compensation (company car, meal vouchers, phone, housing) that the employer provides to the employee.
 
-| Condizione | Soglia esenzione 2025-2027 |
+| Condition | Exemption threshold 2025-2027 |
 |------------|---------------------------|
-| Dipendente **senza** figli a carico | **€1.000** |
-| Dipendente **con** figli a carico | **€2.000** |
+| Employee **without** dependent children | **€1.000** |
+| Employee **with** dependent children | **€2.000** |
 
-**Regola chiave:** se il valore complessivo dei fringe benefit **supera** la soglia, l'**intero importo** diventa reddito imponibile (non solo l'eccedenza). È un meccanismo a franchigia, non a deduzione.
+**Key rule:** if the total value of fringe benefits **exceeds** the threshold, the **entire amount** becomes taxable income (not just the excess). It is an all-or-nothing threshold, not a deduction.
 
-**Nel calcolatore:** l'utente inserisce il valore totale dei fringe benefit annui. Se sopra soglia, l'importo si somma all'imponibile fiscale.
+**In the calculator:** the user enters the total value of annual fringe benefits. If above the threshold, the amount is added to the taxable base.
 
-**Riferimenti:** Art. 51, c.3 TUIR; L. 207/2024 (Legge di Bilancio 2025), art. 1 c. 390-391.
+**References:** Art. 51, para. 3 TUIR; Law 207/2024 (2025 Budget Law), art. 1 paras. 390-391.
 
 ---
 
-### 3. Fondo pensione complementare
+### 3. Supplementary pension fund
 
-I contributi versati a forme di previdenza complementare (fondi negoziali, aperti, PIP) sono **deducibili dal reddito complessivo** fino a **€5.164,57/anno**.
+Contributions paid into supplementary pension schemes (negotiated funds, open funds, PIPs) are **deductible from total income** up to **€5.164,57/year**.
 
-Questo riduce direttamente l'imponibile IRPEF, generando un risparmio fiscale pari al contributo × aliquota marginale IRPEF del contribuente.
+This directly reduces the IRPEF taxable base, generating a tax saving equal to the contribution × the taxpayer's marginal IRPEF rate.
 
-**Esempio:** un dipendente con RAL €35.000 che versa €2.000 al fondo pensione risparmia circa €2.000 × 35% = €700 di IRPEF.
+**Example:** an employee with a RAL of €35.000 who pays €2.000 into the pension fund saves about €2.000 × 35% = €700 in IRPEF.
 
-**Cosa non è incluso nel calcolatore:** il contributo del datore al fondo pensione (anch'esso deducibile entro lo stesso tetto).
+**What is not included in the calculator:** the employer's contribution to the pension fund (also deductible within the same cap).
 
-**Riferimenti:** D.Lgs. 252/2005, art. 8 c. 4.
+**References:** Legislative Decree 252/2005, art. 8 para. 4.
 
 ---
 
 ### 4. IRPEF 2025
 
-L'Imposta sul Reddito delle Persone Fisiche è calcolata per scaglioni progressivi. Dal 2024 (D.Lgs. 216/2023), confermati strutturalmente nel 2025, gli scaglioni sono 3:
+IRPEF, the personal income tax, is calculated by progressive brackets. Since 2024 (Legislative Decree 216/2023), confirmed structurally in 2025, there are 3 brackets:
 
-| Scaglione | Aliquota | Su reddito fino a | Imposta cumulata |
+| Bracket | Rate | On income up to | Cumulative tax |
 |-----------|----------|-------------------|------------------|
-| 1° | **23%** | €28.000 | €6.440 |
-| 2° | **35%** | €50.000 | €6.440 + €7.700 = €14.140 |
-| 3° | **43%** | oltre | €14.140 + 43% sull'eccedenza |
+| 1st | **23%** | €28.000 | €6.440 |
+| 2nd | **35%** | €50.000 | €6.440 + €7.700 = €14.140 |
+| 3rd | **43%** | above | €14.140 + 43% on the excess |
 
-L'IRPEF è **progressiva per scaglioni**: ogni euro aggiuntivo è tassato all'aliquota dello scaglione in cui ricade, non all'aliquota più alta sull'intero reddito.
+IRPEF is **progressive by bracket**: every additional euro is taxed at the rate of the bracket it falls into, not at the highest rate on the entire income.
 
-**Base imponibile IRPEF** = RAL + fringe tassabili − INPS dipendente − fondo pensione deducibile.
+**IRPEF taxable base** = RAL + taxable fringe benefits − employee INPS − deductible pension fund.
 
-**Riferimenti:** Art. 11 TUIR; D.Lgs. 216/2023; L. 207/2024.
+**References:** Art. 11 TUIR; Legislative Decree 216/2023; Law 207/2024.
 
 ---
 
-### 5. Detrazioni lavoro dipendente
+### 5. Employee tax deductions
 
-Le detrazioni riducono l'IRPEF lorda e sono inversamente proporzionali al reddito (chi guadagna meno, paga meno imposte).
+Deductions reduce gross IRPEF and are inversely proportional to income (those who earn less pay less tax).
 
-| Reddito complessivo | Detrazione |
+| Total income | Deduction |
 |---------------------|-----------|
 | ≤ €15.000 | €1.955 |
-| €15.001 – €28.000 | €1.910 + €1.190 × (28.000 − reddito) / 13.000 |
-| €28.001 – €50.000 | €1.910 × (50.000 − reddito) / 22.000 |
+| €15.001 – €28.000 | €1.910 + €1.190 × (28.000 − income) / 13.000 |
+| €28.001 – €50.000 | €1.910 × (50.000 − income) / 22.000 |
 | > €50.000 | €0 |
 
-**Bonus €65:** per redditi tra €25.001 e €35.000 si aggiungono €65 alla detrazione calcolata (D.Lgs. 216/2023).
+**€65 bonus:** for income between €25.001 and €35.000, €65 is added to the calculated deduction (Legislative Decree 216/2023).
 
-**Vincolo:** la detrazione non può superare l'IRPEF lorda (non genera credito d'imposta).
+**Constraint:** the deduction cannot exceed gross IRPEF (it does not generate a tax credit).
 
-**Riferimenti:** Art. 13 TUIR; D.Lgs. 216/2023 art. 1 c. 2.
+**References:** Art. 13 TUIR; Legislative Decree 216/2023 art. 1 para. 2.
 
 ---
 
-### 6. Detrazioni familiari a carico
+### 6. Dependent family deductions
 
-Dopo l'introduzione dell'Assegno Unico (marzo 2022), le detrazioni in busta paga riguardano solo:
+After the introduction of the Single Allowance (*Assegno Unico*, March 2022), payslip deductions concern only:
 
-#### Coniuge a carico (reddito ≤ €2.840,51)
+#### Dependent spouse (income ≤ €2.840,51)
 
-| Reddito del contribuente | Detrazione |
+| Taxpayer's income | Deduction |
 |--------------------------|-----------|
-| ≤ €15.000 | 800 − 110 × (reddito / 15.000) |
-| €15.001 – €40.000 | €690 (con variazioni tra €29K-€35,2K: v. tabella nel codice) |
-| €40.001 – €80.000 | 690 × (80.000 − reddito) / 40.000 |
+| ≤ €15.000 | 800 − 110 × (income / 15.000) |
+| €15.001 – €40.000 | €690 (with variations between €29K-€35.2K: see table in the code) |
+| €40.001 – €80.000 | 690 × (80.000 − income) / 40.000 |
 | > €80.000 | €0 |
 
-#### Figli a carico ≥ 21 anni
+#### Dependent children ≥ 21 years
 
-- **€950** per ciascun figlio ≥ 21 con reddito ≤ €2.840,51 (o ≤ €4.000 se under 24)
-- Phase-out: la detrazione si riduce proporzionalmente: × max(0, (95.000 − reddito) / 95.000)
-- Per figli **< 21 anni**: si percepisce l'**Assegno Unico** (erogato dall'INPS, fuori dalla busta paga)
+- **€950** per child ≥ 21 with income ≤ €2.840,51 (or ≤ €4.000 if under 24)
+- Phase-out: the deduction is reduced proportionally: × max(0, (95.000 − income) / 95.000)
+- For children **< 21 years**: you receive the **Single Allowance** (paid by INPS, outside the payslip)
 
-#### Altri familiari a carico
+#### Other dependent family members
 
-- **€750** per ciascuno (genitori, fratelli, ecc. conviventi con reddito ≤ €2.840,51)
-- Phase-out: × max(0, (80.000 − reddito) / 80.000)
+- **€750** each (parents, siblings, etc. living together with income ≤ €2.840,51)
+- Phase-out: × max(0, (80.000 − income) / 80.000)
 
-**Riferimenti:** Art. 12 TUIR; D.Lgs. 230/2021 (Assegno Unico).
+**References:** Art. 12 TUIR; Legislative Decree 230/2021 (Single Allowance).
 
 ---
 
-### 7. Bonus cuneo fiscale 2025
+### 7. Tax wedge bonus 2025
 
-La Legge di Bilancio 2025 (L. 207/2024) ha reso **strutturale** la riduzione del cuneo contributivo, trasformandola in un meccanismo fiscale a due componenti:
+The 2025 Budget Law (Law 207/2024) made the reduction of the contribution wedge **structural**, turning it into a two-component tax mechanism:
 
-#### A) Indennità (redditi ≤ €20.000) — non tassabile
+#### A) Allowance (income ≤ €20.000) — non-taxable
 
-Per i redditi più bassi, si eroga un'indennità calcolata come percentuale del reddito da lavoro dipendente:
+For the lowest incomes, an allowance is paid, calculated as a percentage of employment income:
 
-| Reddito | Percentuale |
+| Income | Percentage |
 |---------|-------------|
-| ≤ €8.500 | 7,1% |
-| €8.501 – €15.000 | 5,3% |
-| €15.001 – €20.000 | 4,8% |
+| ≤ €8.500 | 7.1% |
+| €8.501 – €15.000 | 5.3% |
+| €15.001 – €20.000 | 4.8% |
 
-Questa indennità **non concorre alla formazione del reddito** (non è tassata) e si aggiunge direttamente al netto.
+This allowance **does not contribute to taxable income** (it is not taxed) and is added directly to the net.
 
-#### B) Ulteriore detrazione IRPEF (redditi €20.001 – €40.000)
+#### B) Additional IRPEF deduction (income €20.001 – €40.000)
 
-| Reddito | Detrazione |
+| Income | Deduction |
 |---------|-----------|
-| €20.001 – €32.000 | €1.000 fissi |
-| €32.001 – €40.000 | €1.000 × (40.000 − reddito) / 8.000 |
+| €20.001 – €32.000 | €1.000 fixed |
+| €32.001 – €40.000 | €1.000 × (40.000 − income) / 8.000 |
 | > €40.000 | €0 |
 
-Questa detrazione riduce l'IRPEF netta (si somma alle detrazioni lavoro dipendente).
+This deduction reduces net IRPEF (it is added to the employee tax deductions).
 
-**Cosa ha sostituito:** il taglio contributivo del 6-7% sulle buste paga del 2023-2024 (che era temporaneo).
+**What it replaced:** the 6-7% contribution cut on 2023-2024 payslips (which was temporary).
 
-**Riferimenti:** L. 207/2024, art. 1 cc. 4-9.
-
----
-
-### 8. Trattamento integrativo
-
-Il "trattamento integrativo" (ex Bonus Renzi, ex Bonus 80€) è un credito IRPEF di **€1.200/anno (€100/mese)**.
-
-Spetta a condizione che:
-- Il reddito complessivo sia **≤ €15.000**
-- L'IRPEF lorda sia **superiore** alle detrazioni da lavoro dipendente (altrimenti non c'è IRPEF da cui "scontare" il bonus)
-
-**Interazione col cuneo fiscale 2025:** per redditi ≤ €15.000, l'indennità del cuneo fiscale (componente A) è generalmente più vantaggiosa del trattamento integrativo. Nel calcolatore, quando è attiva l'indennità cuneo, il trattamento integrativo non viene erogato per evitare il doppio beneficio.
-
-**Riferimenti:** Art. 1 D.L. 3/2020 (conv. L. 21/2020).
+**References:** Law 207/2024, art. 1 paras. 4-9.
 
 ---
 
-### 9. Addizionale regionale IRPEF
+### 8. Supplementary treatment
 
-Ogni Regione/Provincia Autonoma applica un'aliquota sull'imponibile IRPEF. Alcune hanno aliquota unica, altre usano scaglioni progressivi.
+The "supplementary treatment" (formerly the Renzi Bonus, formerly the €80 Bonus) is an IRPEF credit of **€1.200/year (€100/month)**.
 
-Il calcolatore include **tutte le 21 regioni** (incluse le Province Autonome di Trento e Bolzano) con le aliquote aggiornate al 2025:
+It applies provided that:
+- Total income is **≤ €15.000**
+- Gross IRPEF is **higher** than the employee tax deductions (otherwise there is no IRPEF from which to "offset" the bonus)
 
-| Regione | Tipo | Range aliquote |
+**Interaction with the 2025 tax wedge:** for income ≤ €15.000, the tax wedge allowance (component A) is generally more advantageous than the supplementary treatment. In the calculator, when the tax wedge allowance is active, the supplementary treatment is not paid, to avoid a double benefit.
+
+**References:** Art. 1 Decree-Law 3/2020 (converted into Law 21/2020).
+
+---
+
+### 9. Regional IRPEF surtax
+
+Each Region/Autonomous Province applies a rate on the IRPEF taxable base. Some have a single rate, others use progressive brackets.
+
+The calculator includes **all 21 regions** (including the Autonomous Provinces of Trento and Bolzano) with rates updated to 2025:
+
+| Region | Type | Rate range |
 |---------|------|----------------|
-| Abruzzo | 3 scaglioni | 1,67% – 3,33% |
-| Basilicata | Unica | 1,23% |
-| Calabria | Unica | 1,73% |
-| Campania | 4 scaglioni | 1,73% – 3,33% |
-| Emilia-Romagna | 4 scaglioni | 1,33% – 3,33% |
-| Friuli Venezia Giulia | 2 scaglioni | 0,70% – 1,23% |
-| Lazio | 2 scaglioni | 1,73% – 3,33% |
-| Liguria | 3 scaglioni | 1,23% – 3,23% |
-| Lombardia | 4 scaglioni | 1,23% – 1,73% |
-| Marche | 4 scaglioni | 1,23% – 1,73% |
-| Molise | 3 scaglioni | 1,73% – 3,33% |
-| Piemonte | 4 scaglioni | 1,62% – 3,33% |
-| Puglia | 4 scaglioni | 1,33% – 1,85% |
-| Sardegna | Unica | 1,23% |
-| Sicilia | Unica | 1,23% |
-| Toscana | 4 scaglioni | 1,42% – 3,33% |
-| Trentino-AA (Bolzano) | 2 scaglioni | 1,23% – 1,73% |
-| Trentino-AA (Trento) | 3 scaglioni | 0% – 1,73% |
-| Umbria | 3 scaglioni | 1,23% – 3,33% |
-| Valle d'Aosta | Unica | 1,23% |
-| Veneto | Unica | 1,23% |
+| Abruzzo | 3 brackets | 1.67% – 3.33% |
+| Basilicata | Single | 1.23% |
+| Calabria | Single | 1.73% |
+| Campania | 4 brackets | 1.73% – 3.33% |
+| Emilia-Romagna | 4 brackets | 1.33% – 3.33% |
+| Friuli Venezia Giulia | 2 brackets | 0.70% – 1.23% |
+| Lazio | 2 brackets | 1.73% – 3.33% |
+| Liguria | 3 brackets | 1.23% – 3.23% |
+| Lombardia | 4 brackets | 1.23% – 1.73% |
+| Marche | 4 brackets | 1.23% – 1.73% |
+| Molise | 3 brackets | 1.73% – 3.33% |
+| Piemonte | 4 brackets | 1.62% – 3.33% |
+| Puglia | 4 brackets | 1.33% – 1.85% |
+| Sardegna | Single | 1.23% |
+| Sicilia | Single | 1.23% |
+| Toscana | 4 brackets | 1.42% – 3.33% |
+| Trentino-AA (Bolzano) | 2 brackets | 1.23% – 1.73% |
+| Trentino-AA (Trento) | 3 brackets | 0% – 1.73% |
+| Umbria | 3 brackets | 1.23% – 3.33% |
+| Valle d'Aosta | Single | 1.23% |
+| Veneto | Single | 1.23% |
 
-**Nota:** Trento ha una no-tax area fino a €27.000 (aliquota 0%).
+**Note:** Trento has a no-tax area up to €27.000 (0% rate).
 
-**Fonti:** Delibere regionali anno d'imposta 2024/2025; QuantoPrendo.io, Money.it.
-
----
-
-### 10. Addizionale comunale IRPEF
-
-Ogni Comune italiano stabilisce la propria aliquota (0% – 0,9% max) sull'imponibile IRPEF.
-
-Il calcolatore include i **principali comuni** per ogni regione con aliquote preimpostate, più la possibilità di inserire un'aliquota personalizzata per comuni non in lista.
-
-**Esempi:** Milano 0,8% · Roma 0,9% · Napoli 0,9% · Firenze 0,2% · Bologna 0,8% · Bolzano 0,1%.
-
-**Fonti:** Delibere comunali; Portale del Federalismo Fiscale (MEF).
+**Sources:** Regional resolutions for tax year 2024/2025; QuantoPrendo.io, Money.it.
 
 ---
 
-### 11. TFR — Trattamento di Fine Rapporto
+### 10. Municipal IRPEF surtax
 
-Il TFR è una quota della retribuzione che il datore **accantona** annualmente e che viene erogata alla cessazione del rapporto di lavoro. **Non transita in busta paga** (non riduce il netto mensile), ma è un componente importante del reddito differito.
+Each Italian municipality sets its own rate (0% – 0.9% max) on the IRPEF taxable base.
 
-| Voce | Formula |
+The calculator includes the **main municipalities** for each region with preset rates, plus the option to enter a custom rate for municipalities not on the list.
+
+**Examples:** Milan 0.8% · Rome 0.9% · Naples 0.9% · Florence 0.2% · Bologna 0.8% · Bolzano 0.1%.
+
+**Sources:** Municipal resolutions; Fiscal Federalism Portal (MEF).
+
+---
+
+### 11. TFR — Severance pay
+
+The TFR (*Trattamento di Fine Rapporto*) is a portion of pay that the employer **sets aside** annually and pays out at the end of the employment relationship. It **does not pass through the payslip** (it does not reduce the monthly net), but it is an important component of deferred income.
+
+| Item | Formula |
 |------|---------|
-| Accantonamento lordo | RAL / 13,5 (~7,41% della RAL) |
-| Contributo INPS fondo garanzia | − 0,50% della RAL |
-| **Accantonamento netto** | **~6,91% della RAL** |
+| Gross accrual | RAL / 13.5 (~7.41% of RAL) |
+| INPS guarantee-fund contribution | − 0.50% of RAL |
+| **Net accrual** | **~6.91% of RAL** |
 
-**Destinazione del TFR:**
-- Lasciato in azienda (per aziende < 50 dipendenti)
-- Versato al Fondo di Tesoreria INPS (per aziende ≥ 50 dipendenti)
-- Conferito a un fondo pensione complementare (scelta del lavoratore)
+**TFR destination:**
+- Left in the company (for companies with < 50 employees)
+- Paid into the INPS Treasury Fund (for companies with ≥ 50 employees)
+- Transferred to a supplementary pension fund (the worker's choice)
 
-**Tassazione:** il TFR è soggetto a **tassazione separata** (non si cumula con il reddito annuo). L'aliquota applicata è la media delle aliquote IRPEF degli ultimi 5 anni di lavoro. Nel calcolatore, stimiamo questa aliquota usando l'aliquota media IRPEF dell'anno corrente.
+**Taxation:** the TFR is subject to **separate taxation** (it is not cumulated with annual income). The rate applied is the average of the IRPEF rates of the last 5 years of work. In the calculator, we estimate this rate using the average IRPEF rate of the current year.
 
-**Riferimenti:** Art. 2120 Codice Civile; art. 17 TUIR.
+**References:** Art. 2120 of the Civil Code; art. 17 TUIR.
 
 ---
 
-### 12. Costo azienda
+### 12. Employer cost
 
-Il "costo azienda" è il costo totale che il datore di lavoro sostiene per il dipendente. È sempre significativamente superiore alla RAL.
+The "employer cost" is the total cost the employer bears for the employee. It is always significantly higher than the RAL.
 
-| Componente | Privato | Pubblico |
+| Component | Private | Public |
 |-----------|---------|----------|
 | RAL | 100% | 100% |
-| INPS datore | ~31% | ~24,2% |
-| TFR accantonamento | ~7,4% | ~7,4% |
-| INAIL | ~0,4% | — |
-| **Totale stimato** | **~138-140% della RAL** | **~131-132% della RAL** |
+| Employer INPS | ~31% | ~24.2% |
+| TFR accrual | ~7.4% | ~7.4% |
+| INAIL | ~0.4% | — |
+| **Estimated total** | **~138-140% of RAL** | **~131-132% of RAL** |
 
-**Nota:** la stima è semplificata. Il costo reale varia per settore, CCNL, classe di rischio INAIL, presenza di welfare aziendale, etc.
+**Note:** the estimate is simplified. The real cost varies by sector, collective agreement (CCNL), INAIL risk class, presence of company welfare, etc.
 
 ---
 
-## Input disponibili
+## Available inputs
 
-| Input | Descrizione | Default |
+| Input | Description | Default |
 |-------|-------------|---------|
-| RAL | Retribuzione Annua Lorda | €30.000 |
-| Mensilità | 13 (tredicesima) o 14 (+ quattordicesima) | 13 |
-| Settore | Privato o Pubblico | Privato |
-| Regione | 21 opzioni (tutte le regioni italiane) | Lombardia |
-| Comune | Principali città per regione + aliquota custom | Milano |
-| Coniuge a carico | Checkbox | No |
-| Figli ≥ 21 a carico | Numero | 0 |
-| Altri familiari a carico | Numero | 0 |
-| Figli < 21 a carico | Checkbox (innalza soglia fringe a €2.000) | No |
-| Fringe benefit | Importo annuo in € | €0 |
-| Fondo pensione | Contributo annuo in € | €0 |
+| RAL | Gross Annual Salary | €30.000 |
+| Paychecks | 13 (13th month) or 14 (+ 14th month) | 13 |
+| Sector | Private or Public | Private |
+| Region | 21 options (all Italian regions) | Lombardia |
+| Municipality | Main cities per region + custom rate | Milan |
+| Dependent spouse | Checkbox | No |
+| Dependent children ≥ 21 | Number | 0 |
+| Other dependent family members | Number | 0 |
+| Dependent children < 21 | Checkbox (raises fringe threshold to €2.000) | No |
+| Fringe benefits | Annual amount in € | €0 |
+| Pension fund | Annual contribution in € | €0 |
 
 ---
 
-## Output generati
+## Generated outputs
 
-1. **Netto annuale** e **netto mensile** (÷ mensilità)
-2. **Totale trattenute** con percentuale sulla RAL
-3. **TFR accantonato** annuo (lordo e netto stimato)
-4. **Costo azienda** stimato
-5. **Barra visuale** con la composizione della RAL
-6. **Tabella breakdown** voce per voce con segni +/−
-7. **Dettaglio IRPEF** per scaglione (imponibile, aliquota, imposta)
-8. **Dettaglio addizionale regionale** per scaglione
-9. **Dettaglio TFR** (accantonamento, contributo INPS, tassazione)
-10. **Dettaglio cuneo fiscale** (tipo, percentuale, importo)
-11. **Lista completa delle ipotesi** adottate
+1. **Annual net** and **monthly net** (÷ number of paychecks)
+2. **Total withholdings** with percentage of RAL
+3. **Accrued TFR** per year (gross and estimated net)
+4. Estimated **employer cost**
+5. **Visual bar** with the composition of the RAL
+6. **Breakdown table** line by line with +/− signs
+7. **IRPEF detail** by bracket (taxable base, rate, tax)
+8. **Regional surtax detail** by bracket
+9. **TFR detail** (accrual, INPS contribution, taxation)
+10. **Tax wedge detail** (type, percentage, amount)
+11. **Full list of assumptions** applied
 
 ---
 
-## Semplificazioni e limiti noti
+## Simplifications and known limits
 
-Questo è un **prototipo** che copre i casi più comuni. Ecco cosa è stato semplificato e perché:
+This is a **prototype** that covers the most common cases. Here is what was simplified and why:
 
-| Semplificazione | Motivazione |
+| Simplification | Rationale |
 |-----------------|-------------|
-| **Assegno Unico non incluso** | L'AU per figli < 21 è erogato dall'INPS separatamente, non transita in busta paga. Includerlo richiederebbe ISEE come input |
-| **Detrazioni per oneri non incluse** | Spese mediche, interessi mutuo, ristrutturazioni, ecc. sono soggettive e non prevedibili senza il 730 |
-| **Addizionale comunale semplificata** | Alcuni comuni hanno aliquote progressive (non flat). Abbiamo usato i valori noti per i capoluoghi principali |
-| **TFR con aliquota media stimata** | La tassazione separata reale usa la media IRPEF degli ultimi 5 anni. Qui usiamo l'aliquota media dell'anno corrente |
-| **Interazione cuneo/trattamento** | Il trattamento integrativo e l'indennità cuneo possono interagire in modo complesso per redditi intorno a €15K. Abbiamo semplificato: se il cuneo è attivo, il trattamento non si cumula |
-| **CCNL non differenziato** | Diversi CCNL possono prevedere contribuzioni aggiuntive (es. CIGS per aziende > 15 dipendenti: +0,30%). Usiamo l'aliquota base |
-| **Massimale contributivo non applicato** | Per i nuovi iscritti post-1996 con RAL > ~€120K c'è un tetto alla contribuzione INPS. Non implementato |
-| **Conguaglio 730 non incluso** | Il calcolatore simula il netto "a regime", senza recuperi/addebiti da dichiarazione dei redditi |
+| **Single Allowance not included** | The Single Allowance for children < 21 is paid by INPS separately and does not pass through the payslip. Including it would require ISEE as an input |
+| **Itemized deductions not included** | Medical expenses, mortgage interest, renovations, etc. are individual and cannot be predicted without the tax return (730) |
+| **Simplified municipal surtax** | Some municipalities have progressive (non-flat) rates. We used the known values for the main provincial capitals |
+| **TFR with estimated average rate** | Real separate taxation uses the IRPEF average of the last 5 years. Here we use the average rate of the current year |
+| **Tax wedge/treatment interaction** | The supplementary treatment and the tax wedge allowance can interact in complex ways for income around €15K. We simplified: if the tax wedge is active, the treatment is not cumulated |
+| **CCNL not differentiated** | Different collective agreements may include additional contributions (e.g. CIGS for companies with > 15 employees: +0.30%). We use the base rate |
+| **Contribution ceiling not applied** | For new members enrolled after 1996 with a RAL > ~€120K there is a cap on INPS contributions. Not implemented |
+| **Tax-return adjustment not included** | The calculator simulates the "steady-state" net, without refunds/charges from the income tax return |
 
 ---
 
-## Struttura del progetto
+## Project structure
 
 ```
 calcolatore-ral-netto/
-├── index.html    # Tutto il calcolatore (HTML + CSS + JS)
-└── README.md     # Questo file
+├── index.html    # The entire calculator (HTML + CSS + JS)
+└── README.md     # This file
 ```
 
-Scelta deliberata: **zero dipendenze**. Il file `index.html` è self-contained e apribile direttamente nel browser. Non servono Node.js, npm, build tool, o server. Questo rende il prototipo immediatamente verificabile e deployabile su GitHub Pages senza configurazione.
+A deliberate choice: **zero dependencies**. The `index.html` file is self-contained and can be opened directly in the browser. No Node.js, npm, build tool, or server needed. This makes the prototype immediately verifiable and deployable to GitHub Pages with no configuration.
 
 ---
 
-## Come eseguire
+## How to run
 
-### Locale
+### Locally
 ```bash
-# Basta aprire il file nel browser
+# Just open the file in the browser
 open index.html
-# oppure
-python3 -m http.server 8080  # e visitare http://localhost:8080
+# or
+python3 -m http.server 8080  # then visit http://localhost:8080
 ```
 
 ### Online
-Il progetto è hostato su GitHub Pages: **[→ Demo live](https://alessandro114.github.io/calcolatore-ral-netto/)**
+The project is hosted on GitHub Pages: **[→ Live demo](https://alessandro114.github.io/calcolatore-ral-netto/)**
 
 ---
 
-## Fonti normative principali
+## Main legal sources
 
-- **TUIR** — D.P.R. 917/1986 (Testo Unico Imposte sui Redditi)
-- **D.Lgs. 216/2023** — Riforma IRPEF a 3 scaglioni
-- **L. 207/2024** — Legge di Bilancio 2025 (cuneo fiscale strutturale, fringe benefit 2025-2027)
-- **D.Lgs. 252/2005** — Previdenza complementare
-- **D.Lgs. 230/2021** — Assegno Unico Universale
-- **D.L. 3/2020** — Trattamento integrativo
-- **Art. 2120 c.c.** — Trattamento di Fine Rapporto
-- **Circolari INPS** — Aliquote contributive annuali
-- **Delibere regionali e comunali** — Addizionali IRPEF
+- **TUIR** — Presidential Decree 917/1986 (Consolidated Income Tax Act)
+- **Legislative Decree 216/2023** — IRPEF reform to 3 brackets
+- **Law 207/2024** — 2025 Budget Law (structural tax wedge, fringe benefits 2025-2027)
+- **Legislative Decree 252/2005** — Supplementary pensions
+- **Legislative Decree 230/2021** — Universal Single Allowance
+- **Decree-Law 3/2020** — Supplementary treatment
+- **Art. 2120 Civil Code** — Severance pay (TFR)
+- **INPS circulars** — Annual contribution rates
+- **Regional and municipal resolutions** — IRPEF surtaxes
