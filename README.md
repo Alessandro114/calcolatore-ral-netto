@@ -14,7 +14,7 @@ A working prototype of a calculator that, given a gross annual salary (RAL — *
   - [1. Employee INPS contributions](#1-employee-inps-contributions)
   - [2. Fringe benefits](#2-fringe-benefits)
   - [3. Supplementary pension fund](#3-supplementary-pension-fund)
-  - [4. IRPEF 2025](#4-irpef-2025)
+  - [4. IRPEF 2026](#4-irpef-2026)
   - [5. Employee tax deductions](#5-employee-tax-deductions)
   - [6. Dependent family deductions](#6-dependent-family-deductions)
   - [7. Tax wedge bonus 2025](#7-tax-wedge-bonus-2025)
@@ -118,7 +118,7 @@ Contributions paid into supplementary pension schemes (negotiated funds, open fu
 
 This directly reduces the IRPEF taxable base, generating a tax saving equal to the contribution × the taxpayer's marginal IRPEF rate.
 
-**Example:** an employee with a RAL of €35.000 who pays €2.000 into the pension fund saves about €2.000 × 35% = €700 in IRPEF.
+**Example:** an employee with a RAL of €35.000 who pays €2.000 into the pension fund saves about €2.000 × 33% = €660 in IRPEF.
 
 **What is not included in the calculator:** the employer's contribution to the pension fund (also deductible within the same cap).
 
@@ -126,14 +126,16 @@ This directly reduces the IRPEF taxable base, generating a tax saving equal to t
 
 ---
 
-### 4. IRPEF 2025
+### 4. IRPEF 2026
+
+**2026 update (03/11/2026):** the second bracket is 33% (was 35%) per Law 199/2025, art. 1, para. 3, amending art. 11 TUIR; verified on Normattiva. Regional/municipal surtaxes and the tax wedge bonus still use tax-year 2025 values and are not yet re-verified for 2026.
 
 IRPEF, the personal income tax, is calculated by progressive brackets. Since 2024 (Legislative Decree 216/2023), confirmed structurally in 2025, there are 3 brackets:
 
 | Bracket | Rate | On income up to | Cumulative tax |
 |-----------|----------|-------------------|------------------|
 | 1st | **23%** | €28.000 | €6.440 |
-| 2nd | **35%** | €50.000 | €6.440 + €7.700 = €14.140 |
+| 2nd | **33%** | €50.000 | €6.440 + €7.260 = €13.700 |
 | 3rd | **43%** | above | €14.140 + 43% on the excess |
 
 IRPEF is **progressive by bracket**: every additional euro is taxed at the rate of the bracket it falls into, not at the highest rate on the entire income.

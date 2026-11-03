@@ -588,7 +588,7 @@
     //    − Contributo fondo pensione (deducibile, max €5.164,57)
     //    − Contributi INPS dipendente
     //    = Reddito complessivo / Imponibile fiscale
-    //    − IRPEF lorda (3 scaglioni 2025)
+    //    − IRPEF lorda (3 scaglioni 2026)
     //    + Detrazioni lavoro dipendente
     //    + Detrazioni familiari a carico
     //    + Bonus cuneo fiscale (indennità/detrazione)
@@ -787,12 +787,14 @@
       return { total: base + extra, label: "9,19% + 1% su eccedenza" };
     }
 
-    // ── IRPEF 2025 ──────────────────────────────────────────────────────
+    // ── IRPEF 2026 ──────────────────────────────────────────────────────
     // D.Lgs. 216/2023, reso strutturale dalla Legge di Bilancio 2025.
-    // 3 scaglioni: 23% | 35% | 43%.
+    // 2026: L. 199/2025 art. 1 c. 3 (art. 11 c. 1 lett. b TUIR): secondo scaglione 35% -> 33%.
+    // Verificato su Normattiva il 03/11/2026.
+    // 3 scaglioni: 23% | 33% | 43% (2026).
     const IRPEF_BRACKETS = [
       { min: 0,     max: 28000,    rate: 0.23, label: "Fino a €28.000" },
-      { min: 28000, max: 50000,    rate: 0.35, label: "€28.001 – €50.000" },
+      { min: 28000, max: 50000,    rate: 0.33, label: "€28.001 – €50.000" },
       { min: 50000, max: Infinity, rate: 0.43, label: "Oltre €50.000" },
     ];
 
@@ -1264,7 +1266,7 @@
       const ac = document.getElementById("assumptionsCard");
       const assumptionsList = [
         `<strong>Profilo:</strong> ${settore === "privato" ? "Dipendente privato" : "Dipendente pubblico"} a tempo indeterminato, residente in ${regione}`,
-        `<strong>Anno fiscale:</strong> 2025 (IRPEF a 3 scaglioni: 23% / 35% / 43%)`,
+        `<strong>Anno fiscale:</strong> 2026 (IRPEF a 3 scaglioni: 23% / 33% / 43%, L. 199/2025). Addizionali regionali/comunali e bonus cuneo: valori dell'anno d'imposta 2025, non ancora riverificati per il 2026.`,
         `<strong>INPS dipendente:</strong> ${settore === "privato" ? "9,19% fino a €55.448, 10,19% oltre (settore privato)" : "8,80% aliquota unificata (gestione pubblica ex-INPDAP)"}`,
         `<strong>Detrazioni lavoro:</strong> Art. 13 TUIR, 4 fasce + €65 aggiuntivi (redditi €25K-€35K)`,
         `<strong>Cuneo fiscale 2025:</strong> Indennità per redditi ≤ €20K (7,1% / 5,3% / 4,8%) + ulteriore detrazione €1.000 per redditi €20K-€40K`,
